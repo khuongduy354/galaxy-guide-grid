@@ -1,11 +1,42 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Sidebar from "@/components/Sidebar";
+import Header from "@/components/Header";
+import WorkflowGallery from "@/components/WorkflowGallery";
+import FixedChatInput from "@/components/FixedChatInput";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const [activeItem, setActiveItem] = useState("workflow");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const handleItemClick = (item: string) => {
+    setActiveItem(item);
+    if (item === "agent") {
+      navigate("/agent-chat");
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="flex min-h-screen bg-gradient-to-br from-background to-secondary/30">
+      <Sidebar 
+        activeItem={activeItem} 
+        onItemClick={handleItemClick}
+        collapsed={sidebarCollapsed}
+        onCollapsedChange={setSidebarCollapsed}
+      />
+      
+      <div className="flex-1 flex flex-col">
+        <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+        
+        <main className="flex-1 overflow-y-auto p-8">
+          <div className="max-w-7xl mx-auto">
+            <WorkflowGallery searchQuery={searchQuery} />
+          </div>
+        </main>
+
+        <FixedChatInput sidebarCollapsed={sidebarCollapsed} />
       </div>
     </div>
   );
