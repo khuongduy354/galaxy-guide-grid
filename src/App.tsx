@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import AgentChat from "./pages/AgentChat";
 import WorkflowCanvas from "./pages/WorkflowCanvas";
+import ToolsIntegrations from "./pages/ToolsIntegrations";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,6 +21,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/agent-chat" element={<AgentChat />} />
           <Route path="/workflow-canvas/:id" element={<WorkflowCanvas />} />
+          <Route path="/tools-integrations" element={<ToolsIntegrations />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
