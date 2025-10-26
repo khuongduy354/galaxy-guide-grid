@@ -33,7 +33,7 @@ const Header = ({ searchQuery, onSearchChange }: HeaderProps) => {
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
             <span className="text-sm font-bold text-primary-foreground">C</span>
           </div>
-          <span className="font-semibold text-lg hidden md:block">Company Life + Home</span>
+          <span className="font-semibold text-lg hidden md:block">Affic AI</span>
         </div>
         
         {/* Search Bar */}
