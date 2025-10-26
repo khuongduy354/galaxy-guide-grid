@@ -3,9 +3,13 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Facebook, Twitter } from "lucide-react";
+import { Eye, EyeOff, Facebook, Twitter, Loader2 } from "lucide-react";
+import { z } from "zod";
+
+const emailSchema = z.string().email("Please enter a valid email address");
+const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
 
 interface AuthModalProps {
   open: boolean;
@@ -20,10 +24,31 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const { signUp, signIn } = useAuth();
   const { toast } = useToast();
 
-  const validateEmail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validateForm = () => {
+    let isValid = true;
+    
+    const emailResult = emailSchema.safeParse(email);
+    if (!emailResult.success) {
+      setEmailError(emailResult.error.issues[0].message);
+      isValid = false;
+    } else {
+      setEmailError("");
+    }
+
+    const passwordResult = passwordSchema.safeParse(password);
+    if (!passwordResult.success) {
+      setPasswordError(passwordResult.error.issues[0].message);
+      isValid = false;
+    } else {
+      setPasswordError("");
+    }
+
+    return isValid;
   };
 
   const getPasswordStrength = (password: string) => {
@@ -36,19 +61,14 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
     return "Good";
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateEmail(email)) {
-      toast({
-        title: "Invalid Email",
-        description: "Please enter a valid email address",
-        variant: "destructive",
-      });
+    if (!validateForm()) {
       return;
     }
 
-    if (password !== confirmPassword) {
+    if (isSignUp && password !== confirmPassword) {
       toast({
         title: "Passwords Don't Match",
         description: "Please make sure your passwords match",
@@ -57,78 +77,27 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
       return;
     }
 
-    if (password.length < 6) {
-      toast({
-        title: "Weak Password",
-        description: "Password must be at least 6 characters",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/`,
-      },
-    });
 
-    setIsLoading(false);
-
-    if (error) {
-      toast({
-        title: "Sign Up Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Success!",
-        description: "Account created successfully",
-      });
-      onOpenChange(false);
-      setEmail("");
-      setPassword("");
-      setConfirmPassword("");
-    }
-  };
-
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateEmail(email)) {
-      toast({
-        title: "Invalid Email",
-        description: "Please enter a valid email address",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    setIsLoading(false);
-
-    if (error) {
-      toast({
-        title: "Sign In Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Welcome back!",
-        description: "Signed in successfully",
-      });
-      onOpenChange(false);
-      setEmail("");
-      setPassword("");
+    try {
+      if (isSignUp) {
+        const { error } = await signUp(email, password);
+        if (!error) {
+          setEmail("");
+          setPassword("");
+          setConfirmPassword("");
+          onOpenChange(false);
+        }
+      } else {
+        const { error } = await signIn(email, password);
+        if (!error) {
+          setEmail("");
+          setPassword("");
+          onOpenChange(false);
+        }
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -144,7 +113,7 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
             </h2>
           </div>
 
-          <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium text-gray-600">
                 Your Email
@@ -154,10 +123,17 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                 type="email"
                 placeholder="example@gmail.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setEmailError("");
+                }}
                 className="rounded-full px-4 py-6 border-gray-200 bg-white text-gray-900 placeholder:text-gray-400"
                 required
+                disabled={isLoading}
               />
+              {emailError && (
+                <p className="text-sm text-red-600">{emailError}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -170,9 +146,13 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setPasswordError("");
+                  }}
                   className="rounded-full px-4 py-6 border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 pr-10"
                   required
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
@@ -182,7 +162,10 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              {isSignUp && password && (
+              {passwordError && (
+                <p className="text-sm text-red-600">{passwordError}</p>
+              )}
+              {isSignUp && password && !passwordError && (
                 <p className="text-xs text-gray-600">
                   Strength: <span className={passwordStrength === "Complicated" ? "text-green-600 font-medium" : ""}>{passwordStrength}</span>
                 </p>
@@ -203,6 +186,7 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="rounded-full px-4 py-6 border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 pr-10"
                     required
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
@@ -241,7 +225,14 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
               }`}
               disabled={isLoading}
             >
-              {isLoading ? "Loading..." : isSignUp ? "SIGN UP" : "SIGN IN"}
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Please wait
+                </>
+              ) : (
+                isSignUp ? "SIGN UP" : "SIGN IN"
+              )}
             </Button>
           </form>
 
