@@ -21,7 +21,7 @@ const Sidebar = ({
   };
   
   const menuItems = [
-    { id: "tempalte", label: "Template", icon: Workflow },
+    { id: "workflow", label: "Template", icon: Workflow },
     { id: "agent", label: "Agent", icon: Bot },
     { id: "tools", label: "Tools & Integration", icon: Settings },
   ];
