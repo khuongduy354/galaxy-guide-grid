@@ -11,7 +11,6 @@ import { Info, Plus, FileCode } from "lucide-react";
 const ToolsIntegrations = () => {
   const navigate = useNavigate();
   const [activeItem, setActiveItem] = useState("manage");
-  const [searchQuery, setSearchQuery] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const handleItemClick = (item: string) => {
@@ -49,7 +48,7 @@ const ToolsIntegrations = () => {
       />
       
       <div className="flex-1 flex flex-col">
-        <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+        <Header />
         
         <main className="flex-1 overflow-y-auto p-8">
           <div className="max-w-7xl mx-auto">

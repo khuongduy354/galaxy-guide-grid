@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Search, User, LogOut } from "lucide-react";
+import { User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import AuthModal from "@/components/AuthModal";
@@ -12,12 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-interface HeaderProps {
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
-}
-
-const Header = ({ searchQuery, onSearchChange }: HeaderProps) => {
+const Header = () => {
   const { user, signOut } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
@@ -27,27 +21,13 @@ const Header = ({ searchQuery, onSearchChange }: HeaderProps) => {
 
   return (
     <>
-      <header className="h-16 border-b border-border bg-background px-6 flex items-center justify-between gap-6">
+      <header className="h-16 border-b border-border bg-background px-6 flex items-center justify-between">
         {/* Logo/Company Name */}
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
             <span className="text-sm font-bold text-primary-foreground">C</span>
           </div>
           <span className="font-semibold text-lg hidden md:block">Affic AI</span>
-        </div>
-        
-        {/* Search Bar */}
-        <div className="flex-1 max-w-xl">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search"
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-10 bg-secondary border-0"
-            />
-          </div>
         </div>
         
         {/* User Avatar / Auth Trigger */}

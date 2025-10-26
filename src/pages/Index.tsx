@@ -30,7 +30,7 @@ const Index = () => {
       />
       
       <div className="flex-1 flex flex-col">
-        <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+        <Header />
         
         <main className="flex-1 overflow-y-auto p-8">
           <div className="max-w-7xl mx-auto">
@@ -38,7 +38,11 @@ const Index = () => {
           </div>
         </main>
 
-        <FixedChatInput sidebarCollapsed={sidebarCollapsed} />
+        <FixedChatInput 
+          sidebarCollapsed={sidebarCollapsed}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
       </div>
     </div>
   );
