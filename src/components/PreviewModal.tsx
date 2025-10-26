@@ -10,6 +10,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 
 interface PreviewModalProps {
   open: boolean;
@@ -69,10 +73,33 @@ const PreviewModal = ({ open, onOpenChange, templateId, title, description }: Pr
   const navigate = useNavigate();
   const [nodes] = useState<Node[]>(getPreviewNodes(templateId));
   const [edges] = useState<Edge[]>(getPreviewEdges(templateId));
+  const [formData, setFormData] = useState({
+    workflowName: "",
+    description: "",
+    triggerType: "manual",
+    targetAudience: ""
+  });
 
-  const handleUseTemplate = () => {
+  const handleUseTemplate = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validation
+    if (!formData.workflowName.trim()) {
+      toast.error("Please enter a workflow name");
+      return;
+    }
+
+    // Navigate to canvas with parameters
+    const params = new URLSearchParams({
+      name: formData.workflowName,
+      description: formData.description,
+      trigger: formData.triggerType,
+      audience: formData.targetAudience
+    });
+    
     onOpenChange(false);
-    navigate(`/workflow-canvas/${templateId}`);
+    navigate(`/workflow-canvas/${templateId}?${params.toString()}`);
+    toast.success("Template loaded successfully!");
   };
 
   return (
@@ -112,29 +139,87 @@ const PreviewModal = ({ open, onOpenChange, templateId, title, description }: Pr
           </div>
 
           {/* Right Section: Info & Action (25%) */}
-          <div className="w-[25%] flex flex-col p-8 bg-white">
+          <div className="w-[25%] flex flex-col p-6 bg-white overflow-y-auto">
             {/* Top: Template Info */}
-            <div className="flex-1">
-              <DialogHeader className="space-y-4">
-                <DialogTitle className="text-3xl font-bold text-gray-900 leading-tight">
-                  {title}
-                </DialogTitle>
-                <DialogDescription className="text-base text-gray-600 leading-relaxed">
-                  {description}
-                </DialogDescription>
-              </DialogHeader>
-            </div>
+            <DialogHeader className="space-y-3 mb-6">
+              <DialogTitle className="text-2xl font-bold text-gray-900 leading-tight">
+                {title}
+              </DialogTitle>
+              <DialogDescription className="text-sm text-gray-600 leading-relaxed">
+                {description}
+              </DialogDescription>
+            </DialogHeader>
 
-            {/* Bottom: Action Button */}
-            <div className="mt-auto">
-              <Button 
-                size="lg"
-                className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-lg py-6"
-                onClick={handleUseTemplate}
-              >
-                Use this template
-              </Button>
-            </div>
+            {/* Middle: Parameter Form */}
+            <form onSubmit={handleUseTemplate} className="flex-1 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="workflowName" className="text-gray-700 text-sm">
+                  Workflow Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="workflowName"
+                  placeholder="E.g., Social Media Automation"
+                  value={formData.workflowName}
+                  onChange={(e) => setFormData({ ...formData, workflowName: e.target.value })}
+                  className="border-gray-300 text-gray-900"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description" className="text-gray-700 text-sm">
+                  Description
+                </Label>
+                <Textarea
+                  id="description"
+                  placeholder="What will this workflow do?"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="border-gray-300 text-gray-900 min-h-[60px] text-sm"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="triggerType" className="text-gray-700 text-sm">
+                  Trigger Type
+                </Label>
+                <select
+                  id="triggerType"
+                  value={formData.triggerType}
+                  onChange={(e) => setFormData({ ...formData, triggerType: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white text-sm"
+                >
+                  <option value="manual">Manual</option>
+                  <option value="schedule">Scheduled</option>
+                  <option value="webhook">Webhook</option>
+                  <option value="event">Event-based</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="targetAudience" className="text-gray-700 text-sm">
+                  Target Audience / Context
+                </Label>
+                <Input
+                  id="targetAudience"
+                  placeholder="E.g., Tech enthusiasts"
+                  value={formData.targetAudience}
+                  onChange={(e) => setFormData({ ...formData, targetAudience: e.target.value })}
+                  className="border-gray-300 text-gray-900"
+                />
+              </div>
+
+              {/* Bottom: Action Button */}
+              <div className="pt-4">
+                <Button 
+                  type="submit"
+                  size="lg"
+                  className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90"
+                >
+                  Use this template
+                </Button>
+              </div>
+            </form>
           </div>
 
         </div>
