@@ -54,6 +54,7 @@ const AgentChat = () => {
   const handleItemClick = (item: string) => {
     if (item === "workflow") navigate("/");
     else if (item === "agent") navigate("/agent-chat");
+    else if (item === "manage") navigate("/tools-integrations");
   };
 
   return (

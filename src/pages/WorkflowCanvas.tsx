@@ -124,6 +124,7 @@ const WorkflowCanvas = () => {
   const handleItemClick = (item: string) => {
     if (item === "workflow") navigate("/");
     else if (item === "agent") navigate("/agent-chat");
+    else if (item === "manage") navigate("/tools-integrations");
   };
 
   const onConnect = useCallback(

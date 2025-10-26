@@ -10,7 +10,7 @@ import { Info, Plus, FileCode } from "lucide-react";
 
 const ToolsIntegrations = () => {
   const navigate = useNavigate();
-  const [activeItem, setActiveItem] = useState("tools");
+  const [activeItem, setActiveItem] = useState("manage");
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -20,8 +20,6 @@ const ToolsIntegrations = () => {
       navigate("/");
     } else if (item === "agent") {
       navigate("/agent-chat");
-    } else if (item === "tools") {
-      navigate("/tools-integrations");
     }
   };
 

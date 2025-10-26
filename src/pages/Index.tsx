@@ -15,7 +15,7 @@ const Index = () => {
     setActiveItem(item);
     if (item === "agent") {
       navigate("/agent-chat");
-    } else if (item === "tools") {
+    } else if (item === "manage") {
       navigate("/tools-integrations");
     }
   };
